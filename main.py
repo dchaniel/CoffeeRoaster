@@ -8,18 +8,18 @@ import asyncio
 # Initialize hardware components
 i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
 mcp = adafruit_mcp9600.MCP9600(i2c)
-psm = digitalio.DigitalInOut(board.D4)
+psm = digitalio.DigitalInOut(board.A2)
 psm.direction = digitalio.Direction.OUTPUT
 
 # Define temperature profile
-temperature_profile = [(0, 25), (300, 150), (600, 200), (900, 225), (1200, 180)]
-deadband = 5  # Temperature range in degrees Celsius around the target
+temperature_profile = [(0, 0), (100, 230), (400, 100), (450, 0)]
+deadband = 0  # Temperature range in degrees Celsius around the target
 
 # Shared state
 shared_state = {
-    "current_time": 0,
-    "current_temperature": 0,
-    "ideal_temperature": 0,
+    "current_time": 0.0,
+    "current_temperature": 0.0,
+    "ideal_temperature": 0.0,
     "heater_status": "OFF"
 }
 
@@ -42,40 +42,40 @@ async def control_loop():
     """Controls the heating element and updates the shared state."""
     start_time = time.time()
     times, temperatures = zip(*temperature_profile)
+    on = True
     while True:
         shared_state["current_time"] = time.time() - start_time
         shared_state["ideal_temperature"] = linear_interpolation(shared_state["current_time"], times, temperatures)
-        
+
         if shared_state["current_temperature"] < shared_state["ideal_temperature"] - deadband:
             shared_state["heater_status"] = "ON"
             psm.value = True
         elif shared_state["current_temperature"] > shared_state["ideal_temperature"] + deadband:
             shared_state["heater_status"] = "OFF"
             psm.value = False
+        # psm.value = on
+        # on = not on
+        # print("on =")
+        # print(on)
         await asyncio.sleep(1)  # Control adjustments at 1Hz
 
-def get_simple_timestamp():
-    """Generates a simple timestamp string."""
+def get_timestamp_filename():
+    """Generates a filename based on the current date and time."""
     t = time.localtime()  # Get the current time structure
-    # Format the time as "HH:MM:SS"
-    return "{:02d}:{:02d}:{:02d}".format(t.tm_hour, t.tm_min, t.tm_sec)
+    # Format the filename as "YYYY-MM-DD_HH-MM-SS.csv"
+    return "{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}.csv".format(t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec)
 
-# Adjust the log_data function
 async def log_data():
-    """Logs data every 0.1 seconds."""
     while True:
-        print("{},{:.2f},{:.2f},{:.2f},{}".format(
-            get_simple_timestamp(),
-            shared_state["current_time"],
-            shared_state["current_temperature"],
-            shared_state["ideal_temperature"],
-            shared_state["heater_status"]
-        ))
-        await asyncio.sleep(0.1)  # Logging at 10Hz
-
+        current_time = float(shared_state["current_time"])
+        current_temperature = float(shared_state["current_temperature"])
+        ideal_temperature = float(shared_state["ideal_temperature"])
+        heater_status = 1 if psm.value else 0  # Convert boolean status to 1 or 0
+        print("{:.2f}, {:.2f}, {}".format(current_temperature, ideal_temperature, heater_status))
+        await asyncio.sleep(0.2)  # Logging at 10Hz
+        
 async def main():
     """Initializes and runs the update_temperature, control loop, and logging tasks."""
-    input("Press Enter to start the roasting process...")
     temperature_task = asyncio.create_task(update_temperature())
     control_task = asyncio.create_task(control_loop())
     logging_task = asyncio.create_task(log_data())
