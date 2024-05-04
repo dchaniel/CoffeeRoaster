@@ -1,0 +1,5 @@
+# Ignore all CSV files
+*.csv
+
+# Ignore settings.json files
+settings.json

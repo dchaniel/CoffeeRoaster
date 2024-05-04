@@ -27,7 +27,7 @@ def create_log_file():
     log_file_name = f"data_log_{timestamp}.csv"
     return open(log_file_name, "a")
 
-def main(debug=False):
+def plot_live(debug=False):
     ser = initialize_serial_connection()
     fig, ax, lines = setup_plot()
     log_file = create_log_file()
@@ -83,6 +83,48 @@ def main(debug=False):
         ser.close()
         plt.close(fig)
 
+def plot_from_csv(csv_file_path):
+    """Plot graphs from a CSV file."""
+    times = []
+    actual_temps = []
+    desired_temps = []
+    heater_statuses = []
+
+    # Read data from CSV
+    with open(csv_file_path, 'r') as file:
+        for line in file:
+            elapsed_time, actual_temp, desired_temp, heater_status = line.strip().split(',')
+            times.append(float(elapsed_time))
+            actual_temps.append(float(actual_temp))
+            desired_temps.append(float(desired_temp))
+            heater_statuses.append(float(heater_status))
+
+    # Setup plot
+    plt.ion()  # Turn on interactive mode
+    fig, ax = plt.subplots(2, 1, figsize=(10, 8))  # Create two subplots
+
+    # Plot actual and desired temperatures
+    ax[0].plot(times, actual_temps, '-', label='Actual Temperature')
+    ax[0].plot(times, desired_temps, '-', label='Desired Temperature')
+    ax[0].legend(loc="upper left")
+    ax[0].set_xlabel('Time (s)')
+    ax[0].set_ylabel('Temperature')
+
+    # Plot heater status
+    ax[1].step(times, heater_statuses, where='post')
+    ax[1].set_ylim(-0.1, 1.1)  # Heater status is either 0 or 1
+    ax[1].set_xlabel('Time (s)')
+    ax[1].set_ylabel('Heater Status')
+
+    plt.show()
+    breakpoint()
+
+    
+
 if __name__ == "__main__":
-    # Set debug to True if you want to print debug information to the terminal
-    main(debug=True)
+    csv = False # TODO: Make this nice
+    if csv:
+        csv_file_path = "data_log_2024-04-16_21-21-25.csv"  # Update this to your CSV file path
+        plot_from_csv(csv_file_path)
+    else:
+        plot_live(debug=True)
