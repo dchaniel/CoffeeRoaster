@@ -16,3 +16,8 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+      - name: Run ruff check
+        run: |
+          pip install ruff
+          ruff .
+        continue-on-error: false
