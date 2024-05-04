@@ -12,7 +12,7 @@ psm = digitalio.DigitalInOut(board.A2)
 psm.direction = digitalio.Direction.OUTPUT
 
 # Define temperature profile
-temperature_profile = [(0, 0), (100, 230), (400, 100), (450, 0)]
+temperature_profile = [(0, 140), (480, 235), (600, 240), (601, 0)]
 deadband = 0  # Temperature range in degrees Celsius around the target
 
 # Shared state
