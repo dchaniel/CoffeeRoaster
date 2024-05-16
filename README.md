@@ -1,8 +1,15 @@
-# Coffee Roaster
+# Air Popper Coffee Roaster Controller
 
 Code to control a coffee roaster using a Raspberry Pi, MCP9601 thermocouple amplifier, and a solid state relay.
 
-# TODO
+## Example Roasting Profile
+![Example Graph](example_graph.png)
+
+## Getting Started
+
+TODO: Write up a guide on how to get started
+
+## TODO
 
 - [ ] Make the temperature profile come from a config file
 - [ ] Integrate a second thermocouple and try to control based also on ([Rate of Rise](https://www.roestcoffee.com/roestblog/rate-of-rise#:~:text=Rate%20of%20Rise%20(RoR)%20measures,heat%20from%20the%20roasting%20machine.))

@@ -138,10 +138,10 @@ def plot_from_csv(csv_file_path):
 
 
 if __name__ == "__main__":
-    csv = False  # TODO: Make this nice
+    csv = True  # TODO: Make this nice
     if csv:
         csv_file_path = (
-            "data_log_2024-04-16_21-21-25.csv"  # Update this to your CSV file path
+            "data/data_log_2024-04-16_21-21-25.csv"  # Update this to your CSV file path
         )
         plot_from_csv(csv_file_path)
     else:
